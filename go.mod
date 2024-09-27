@@ -1,3 +1,3 @@
-module github.com/panta/go-json-matcher
+module github.com/fedemoya/go-json-matcher
 
 go 1.18
