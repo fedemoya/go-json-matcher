@@ -3,7 +3,7 @@ package matcher_test
 import (
 	"testing"
 
-	matcher "github.com/panta/go-json-matcher"
+	matcher "github.com/fedemoya/go-json-matcher"
 )
 
 func TestJsonStringMatches(t *testing.T) {

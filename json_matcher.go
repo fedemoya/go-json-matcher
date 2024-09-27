@@ -226,7 +226,7 @@ func _match(x interface{}, spec interface{}) (bool, error) {
 		isMarker, specMarker := getMarker(spec)
 		if isMarker {
 			matched, err := _matchWithMarker(x, specMarker)
-			if err != nil && !matched {
+			if err == nil && !matched {
 				_log("<< %v >> does not match the marker << %s >>", x, specMarker)
 			}
 			return matched, err
@@ -246,8 +246,8 @@ func _match(x interface{}, spec interface{}) (bool, error) {
 
 	if m, ok := matchers[specV.Kind()]; ok {
 		matched, err := m(x, spec)
-		if err != nil && !matched {
-			_log("%v does not match the spec %v", x, spec)
+		if err == nil && !matched {
+			_log("<< %v >> does not match the spec << %v >>", x, spec)
 		}
 		return matched, err
 	}
