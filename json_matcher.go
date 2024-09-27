@@ -215,27 +215,41 @@ func _matchWithMarker(x interface{}, marker string) (bool, error) {
 func _match(x interface{}, spec interface{}) (bool, error) {
 	specV := reflect.ValueOf(spec)
 	if !specV.IsValid() {
-		return _matchZero(x)
+		isZero, err := _matchZero(x)
+		if !isZero {
+			_log("<< %v >> should be the zero value but it is not", x)
+		}
+		return isZero, err
 	}
 
 	if specV.Kind() == reflect.String {
 		isMarker, specMarker := getMarker(spec)
 		if isMarker {
-			return _matchWithMarker(x, specMarker)
+			matched, err := _matchWithMarker(x, specMarker)
+			if err != nil && !matched {
+				_log("<< %v >> does not match the marker << %s >>", x, specMarker)
+			}
+			return matched, err
 		}
 	}
 
 	xV := reflect.ValueOf(x)
 	if !xV.IsValid() {
+		_log("<< %v >> should match %v but it is the zero value", x, spec)
 		return false, nil // here we now that spec is non-zero
 	}
 
 	if xV.Kind() != specV.Kind() {
+		_log("<< %v >> does not match the spec type << %v >>", x, spec)
 		return false, nil
 	}
 
 	if m, ok := matchers[specV.Kind()]; ok {
-		return m(x, spec)
+		matched, err := m(x, spec)
+		if err != nil && !matched {
+			_log("%v does not match the spec %v", x, spec)
+		}
+		return matched, err
 	}
 	tX := reflect.TypeOf(x)
 	return false, fmt.Errorf("unable to compare %v (type: %v) - kind %v is not supported", x, tX, xV.Kind())
@@ -386,4 +400,9 @@ func _matchSlice(x interface{}, y interface{}) (bool, error) {
 
 func _matchPrimitive(x interface{}, y interface{}) (bool, error) {
 	return reflect.DeepEqual(x, y), nil
+}
+
+func _log(msg string, args ...any) {
+	msg = "[JSON MATCHER] " + msg + "\n"
+	fmt.Printf(msg, args...)
 }
